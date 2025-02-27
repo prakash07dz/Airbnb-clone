@@ -1,0 +1,113 @@
+<% layout("/layouts/boilerplate") -%>
+
+    <div class="row">
+        <div class="col-8 offset-3">
+            <h3>
+                <%= listing.title %>
+            </h3>
+        </div>
+        <div class="card col-6 offset-3 px-0 py-0 listing-card">
+            <img src="<%= listing.image.url%>" class="card-img-top" alt="listing-image" style="height: 30vh;">
+
+            <div class="card-body">
+                <p class="card-text">
+                    Owned by <i>
+                        <%= listing.owner.username %>
+                    </i>
+                <p class="card-text">
+                    <%= listing.description %>
+                </p>
+                <p class="card-text">
+                    <%= listing.category %>
+                </p>
+                <p class="card-text">
+                    &#8377; <%= listing.price.toLocaleString("en-IN") %>
+                </p>
+                <p class="card-text">
+                    <%= listing.location %>
+                </p>
+                <p class="card-text">
+                    <%= listing.country %>
+                </p>
+            </div>
+        </div>
+        <% if (currUser && currUser._id.equals(listing.owner._id)) { %>
+            <div class="btns d-flex mb-3 offset-1">
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-2 edit-btn">Edit</a>
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                    <button class="btn btn-dark offset-4">Delete</button>
+                </form>
+            </div>
+            <% } %>
+                <div class="col-8 offset-3 mb-3">
+                    <% if (currUser) { %>
+                        <hr>
+                        <h4>Leave a Review</h4>
+                        <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate
+                            class="needs-validation">
+                            <div class="mb-3 mt-3">
+                                <label for="rating" class="form-label">Rating</label>
+                                <fieldset class="starability-slot">
+                                    <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]"
+                                        value="1" checked aria-label="No rating." />
+                                    <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                                    <label for="first-rate1" title="Terrible">1 star</label>
+                                    <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                    <label for="first-rate2" title="Not good">2 stars</label>
+                                    <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                    <label for="first-rate3" title="Average">3 stars</label>
+                                    <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                    <label for="first-rate4" title="Very good">4 stars</label>
+                                    <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                    <label for="first-rate5" title="Amazing">5 stars</label>
+                                </fieldset>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="comment" class="form-label">Comments</label>
+                                <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control"
+                                    required></textarea>
+                                <div class="invalid-feedback">
+                                    Please add some comment for review
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-dark">Submit</button>
+                        </form>
+                        <% } %>
+                            <% if (listing.reviews.length>0) { %>
+                            <hr>
+
+                                <p><b>All Reviews</b></p>
+                                <div class="row">
+                                    <% for(review of listing.reviews ) { %>
+                                        <div class="card col-5 mb-5 ms-3">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    @<%= review.author.username %>
+                                                </h5>
+                                                <p class="starability-result card-text"
+                                                    data-rating="<%= review.rating ? review.rating : 0 %>">
+                                                </p>
+                                                <p class="card-text">
+                                                    <%= review.comment %>
+                                                </p>
+                                            </div>
+                                            <form class="mb-3" method="POST"
+                                                action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                                                <button class="btn btn-sm btn-dark">Delete</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+
+                                            <% } %>
+                                </div>
+
+                                <!-- <div class="col-8 offset-3 mb-3">
+                                    <h3>Where you'll be</h3>
+                                    <div id="map" class="mb-3">
+                                        <iframe
+                                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d235013.7484266733!2d72.41492716161305!3d23.02047410287744!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848aba5bd449%3A0x4fcedd11614f6516!2sAhmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1734059042005!5m2!1sen!2sin"
+                                            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                    </div>
+                                </div> -->
+                </div>
