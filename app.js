@@ -69,9 +69,35 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// Security Headers
+app.use((req, res, next) => {
+    res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self' https:; " +
+        "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src 'self' https: 'unsafe-inline'; " +
+        "img-src 'self' https: data:; " +
+        "font-src 'self' https: data:; " +
+        "connect-src 'self' https:; " +
+        "frame-ancestors 'none';"
+    );
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader(
+        "Permissions-Policy",
+        "geolocation=(), microphone=(), camera=(), payment=()"
+    );
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+});
 
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
