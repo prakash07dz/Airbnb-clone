@@ -18,7 +18,6 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
-const crypto = require("crypto");
 
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -77,21 +76,13 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// Generate a nonce for each request and make it available to views
+// Security Headers
 app.use((req, res, next) => {
-    const nonce = crypto.randomBytes(16).toString("base64");
-    res.locals.nonce = nonce;
-    next();
-});
-
-// Security Headers (simplified for portfolio use)
-app.use((req, res, next) => {
-    const nonce = res.locals.nonce;
     res.setHeader(
         "Content-Security-Policy",
         `default-src 'self' https:; ` +
-        `script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; ` + // Allow inline scripts for simplicity
-        `style-src 'self' https: 'unsafe-inline'; ` + // Allow inline styles for simplicity
+        `script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; ` +
+        `style-src 'self' https: 'unsafe-inline'; ` +
         `img-src 'self' https: data:; ` +
         `font-src 'self' https: data:; ` +
         `connect-src 'self' https:; ` +
@@ -102,6 +93,10 @@ app.use((req, res, next) => {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     res.setHeader("X-XSS-Protection", "1; mode=block");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader(
+        "Permissions-Policy",
+        "geolocation=(), microphone=(), camera=(), payment=()"
+    );
     next();
 });
 
