@@ -18,6 +18,7 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const cors = require("cors");
 
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -40,6 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
+app.use(cors());
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -75,38 +77,6 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
-// Security Headers
-app.use((req, res, next) => {
-    res.setHeader(
-        "Content-Security-Policy",
-        `default-src 'self' https:; ` +
-        `script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; ` +
-        `style-src 'self' https: 'unsafe-inline'; ` +
-        `img-src 'self' https: data:; ` +
-        `font-src 'self' https: data:; ` +
-        `connect-src 'self' https:; ` +
-        `frame-ancestors 'none';`
-    );
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
-    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-    res.setHeader("X-XSS-Protection", "1; mode=block");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader(
-        "Permissions-Policy",
-        "geolocation=(), microphone=(), camera=(), payment=()"
-    );
-    next();
-});
-
-// HTTPS Redirection (for production)
-app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === "production") {
-        return res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-    next();
-});
 
 // Flash messages and current user
 app.use((req, res, next) => {
